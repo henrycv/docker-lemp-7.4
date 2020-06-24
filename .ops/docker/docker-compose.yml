@@ -1,0 +1,80 @@
+##
+## Name: docker-lemp-7.4
+## Author: https://about.me/henrycv
+##
+
+version: '3.7'
+services:
+  php-7.4:
+    build: 
+      context: .
+      dockerfile: ./php-7.4/Dockerfile
+      args: 
+        SERVER_PATH: ${SERVER_PATH}
+    container_name: php-7.4
+    image: php-7.4
+    working_dir: /var/www
+    volumes: 
+      - ${SERVER_PATH}:/var/www
+    expose: 
+      - "9000/tcp"  
+      
+  php-5.6:
+    build: 
+      context: .
+      dockerfile: ./php-5.6/Dockerfile
+      args: 
+        SERVER_PATH: ${SERVER_PATH}
+    container_name: php-5.6
+    image: php-5.6
+    working_dir: /var/www
+    volumes: 
+      - ${SERVER_PATH}:/var/www
+  
+  nginx-1.19:
+    build: 
+      context: .
+      dockerfile: ./nginx-1.19/Dockerfile
+    container_name: nginx-1.19
+    image: nginx-1.19
+    restart: on-failure
+    working_dir: /var/www
+    volumes: 
+      - ${SERVER_PATH}:/var/www
+      - ./nginx-1.19/conf.d/:/etc/nginx/conf.d/
+    ports: 
+      - "80:80"
+      - "443:443"
+
+  httpd-2.4:
+    build: 
+      context: .
+      dockerfile: ./httpd-2.4/Dockerfile
+    container_name: httpd-2.4
+    image: httpd-2.4
+    restart: on-failure
+    working_dir: /var/www
+    volumes: 
+      - ${SERVER_PATH}:/var/www
+    ports: 
+      - "8080:8080"
+  
+  mysql-8:
+    image: mysql:8.0.18
+    container_name: mysql-8
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: dev
+      MYSQL_DATABASE: test
+    restart: on-failure
+    volumes:
+      - mysql-8-vol:/var/lib/mysql/
+    ports:
+      - "3307:3307"
+    expose:
+      - "3307"
+  
+volumes: 
+  mysql-8-vol:
